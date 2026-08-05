@@ -1,8 +1,33 @@
-# Auth2API
+<p align="center">
+  <img src="desktop/src-tauri/icons/icon.png" alt="Auth2API" width="120" height="120" />
+</p>
 
-Sign in with a ChatGPT account, and serve it on localhost as an
-OpenAI-compatible API. Requests spend your ChatGPT subscription rather than an
-API-key balance.
+<h1 align="center">Auth2API</h1>
+
+<p align="center">
+  <strong>Sign in with a ChatGPT account. Get an OpenAI-compatible API on localhost.</strong><br>
+  Requests spend your ChatGPT subscription, not an API-key balance.
+</p>
+
+<p align="center">
+  <a href="https://github.com/CatVinci-Studio/Auth2API/releases/latest"><strong>Download</strong></a> ·
+  <a href="./README.zh.md">中文</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/CatVinci-Studio/Auth2API/releases/latest"><img alt="version" src="https://img.shields.io/github/v/release/CatVinci-Studio/Auth2API"></a>
+  <img alt="platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey">
+  <a href="./LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-yellow"></a>
+</p>
+
+---
+
+## What it is
+
+Auth2API signs in to your ChatGPT account through the browser and serves that
+session as an OpenAI-compatible API on `127.0.0.1`. Anything that speaks the
+OpenAI protocol — an editor plugin, an SDK, a script — points at it and works,
+while the tokens come out of your subscription instead of an API-key bill.
 
 Ships as one binary and one small desktop app, both on the same core.
 
@@ -42,30 +67,44 @@ Consequences worth knowing before you rely on this:
   400s upstream, so they are removed rather than forwarded — a client that
   sets a harmless default should not be punished for it.
 
+## Install
+
+Grab a build from [Releases](https://github.com/CatVinci-Studio/Auth2API/releases/latest):
+
+| Platform | Desktop app | Headless CLI |
+|---|---|---|
+| macOS (Apple Silicon) | `Auth2API_0.1.0_aarch64.dmg` | `auth2api-macos-arm64` |
+| macOS (Intel) | `Auth2API_0.1.0_x64.dmg` | `auth2api-macos-x64` |
+| Windows | `Auth2API_0.1.0_x64-setup.exe` · `_x64_en-US.msi` | `auth2api-windows-x64.exe` |
+| Linux | `Auth2API_0.1.0_amd64.AppImage` · `_amd64.deb` | `auth2api-linux-x64` |
+
+Or build it yourself — Rust is the only prerequisite for the CLI:
+
+```bash
+cargo build --release              # target/release/auth2api
+cd desktop && cargo tauri build    # the desktop bundle
+```
+
 ## Quick start
 
 ```bash
-cargo build --release                 # target/release/auth2api
-auth2api login                        # opens your browser
-auth2api keys new zed                 # prints a key; copy it
-auth2api serve                        # http://127.0.0.1:8787/v1
+auth2api login          # opens your browser
+auth2api keys new zed   # prints a key; copy it
+auth2api serve          # http://127.0.0.1:8787/v1
 ```
 
 Point anything OpenAI-compatible at it:
 
 ```bash
-curl http://127.0.0.1:8787/v1/chat/completions \
-  -H "Authorization: Bearer sk-a2a-..." \
-  -H 'content-type: application/json' \
-  -d '{"model":"gpt-5.6-luna","messages":[{"role":"user","content":"hi"}],"stream":true}'
-```
-
-Or as environment variables, which most SDKs and editors read:
-
-```bash
 export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
 export OPENAI_API_KEY=sk-a2a-...
 ```
+
+The desktop app does the same things in a small panel: the icon is the on/off
+switch, the row it sits in is the address, and the rest is the key list. The
+chevron on the right edge widens the window into the usage charts. It drives
+the same core and reads the same files as the CLI, so the two can never
+disagree.
 
 ## Endpoints
 
@@ -137,27 +176,6 @@ output = 10.0
 No prices ship by default, on purpose: invented defaults would produce
 authoritative-looking figures that are wrong the moment a price changes.
 
-## Desktop app
-
-Prebuilt bundles for macOS (Intel and Apple Silicon), Windows and Linux are on
-the [releases page](../../releases), alongside the headless `auth2api` binary
-for each. To build it yourself:
-
-```bash
-cd desktop && cargo tauri build
-# or, for development, against a throwaway state directory:
-./scripts/dev-desktop.sh
-```
-
-A small panel: the icon doubles as the on/off switch, the row below is the
-address, and the rest is the key list. The chevron on the right edge widens
-the window into the usage charts. It drives the same core as the CLI and reads
-the same files, so the two can never disagree.
-
-Editing the port or clicking the host rebinds a running server rather than
-waiting for a restart — a field that accepts an edit and then ignores it is
-worse than one that refuses it.
-
 ## Sharing on a local network
 
 Click the host in the address bar (or `auth2api serve --host 0.0.0.0`) and
@@ -171,6 +189,10 @@ other machines can reach it. Two things happen automatically:
   because with a VPN up the obvious shortcuts — asking the routing table, or
   preferring a private range — both return the tunnel address, which is
   precisely the one nobody on your network can reach.
+
+Check what "local network" means on your connection before relying on it. On a
+home router it is your own devices; on a university or office network the same
+subnet can be hundreds of machines.
 
 ## Models
 
