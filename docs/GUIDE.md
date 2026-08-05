@@ -279,12 +279,16 @@ treat an upstream change as something the suite will not catch for you.
 
 ## Releasing
 
-Pushing a `v*` tag builds every platform and publishes a draft release with
-the desktop bundles and the CLI binaries attached:
+Pushing a `v*` tag builds every platform and publishes a release with the
+desktop bundles and the CLI binaries attached:
 
 ```bash
 git tag v0.1.0 && git push origin v0.1.0
 ```
+
+The release is held as a draft until every platform has uploaded, then
+published automatically. If one platform fails it stays a draft — that is the
+state worth inspecting, not shipping.
 
 Keep `version` in the workspace `Cargo.toml` and in
 `desktop/src-tauri/tauri.conf.json` in step with the tag — nothing checks that

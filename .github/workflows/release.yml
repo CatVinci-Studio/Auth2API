@@ -82,8 +82,11 @@ jobs:
 
             Desktop app bundles and the headless `auth2api` binary are attached
             below. See the README for what this is and its caveats.
-          # Published as a draft so the notes and the artifact list can be read
-          # before anyone can download a half-uploaded matrix.
+          # Stays a draft for the duration of the matrix: the first platform to
+          # finish would otherwise publish a release the other three have not
+          # uploaded to yet, and anyone downloading in that window gets a
+          # version that silently supports one OS. The publish job below flips
+          # it once every platform is in.
           releaseDraft: true
           prerelease: false
 
@@ -105,3 +108,21 @@ jobs:
           # --clobber so a re-run replaces its own artifact instead of failing
           # on a name that already exists.
           gh release upload "$tag" "$out" --clobber
+
+  publish:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          # `needs` already guarantees every platform succeeded - a failed one
+          # leaves the release a draft, which is the state you want to inspect
+          # rather than ship.
+          gh release edit "$tag" --draft=false --latest
+          echo "Published $tag"
+          gh release view "$tag" --json assets --jq '.assets[].name'
