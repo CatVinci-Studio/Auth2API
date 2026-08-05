@@ -1,0 +1,6 @@
+/target
+**/target
+.DS_Store
+
+# Written by `cargo tauri build`
+/desktop/src-tauri/gen

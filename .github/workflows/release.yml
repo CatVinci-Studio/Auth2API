@@ -1,0 +1,107 @@
+name: Release
+
+# Tag-driven: pushing v0.1.0 builds every platform and publishes that tag.
+# The manual trigger exists so a failed run can be retried without moving the
+# tag, which would otherwise rewrite what a published version means.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            label: macos-arm64
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            label: macos-x64
+          # 22.04, not latest: Tauri v2 links against webkit2gtk-4.1, and
+          # building on a newer image produces a binary that will not start on
+          # the distributions most people are running.
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            label: linux-x64
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            label: windows-x64
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev \
+            patchelf build-essential curl wget file libxdo-dev libssl-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+          key: ${{ matrix.target }}
+
+      - name: Test
+        # Only once, on the native Linux runner: the suite is
+        # platform-independent and running it four times only slows the release
+        # down. Cross-compiled targets could not run it anyway.
+        if: matrix.label == 'linux-x64'
+        run: cargo test --workspace
+
+      - name: Build and publish the desktop app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: ./desktop
+          args: --target ${{ matrix.target }}
+          tagName: ${{ github.event.inputs.tag || github.ref_name }}
+          releaseName: Auth2API ${{ github.event.inputs.tag || github.ref_name }}
+          releaseBody: |
+            Sign in with a ChatGPT account and serve it as a local
+            OpenAI-compatible API.
+
+            Desktop app bundles and the headless `auth2api` binary are attached
+            below. See the README for what this is and its caveats.
+          # Published as a draft so the notes and the artifact list can be read
+          # before anyone can download a half-uploaded matrix.
+          releaseDraft: true
+          prerelease: false
+
+      - name: Build the headless CLI
+        run: cargo build --release -p auth2api-cli --target ${{ matrix.target }}
+
+      - name: Attach the CLI binary
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          src="target/${{ matrix.target }}/release/auth2api"
+          out="auth2api-${{ matrix.label }}"
+          if [ "${{ matrix.platform }}" = "windows-latest" ]; then
+            src="$src.exe"; out="$out.exe"
+          fi
+          cp "$src" "$out"
+          # --clobber so a re-run replaces its own artifact instead of failing
+          # on a name that already exists.
+          gh release upload "$tag" "$out" --clobber

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auth2API</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Signed out: one button, nothing else. -->
+    <section id="gate" class="gate" hidden>
+      <span class="mark mark-lg" aria-hidden="true"></span>
+      <button id="btn-login" class="btn btn-primary btn-lg">Sign in with ChatGPT</button>
+    </section>
+
+    <!-- Signed in -->
+    <section id="app" class="app" hidden>
+      <div class="panel">
+        <header class="head">
+          <button id="btn-power" class="power" title="Start" aria-label="Start server">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v8" />
+              <path d="M18.4 6.6a9 9 0 1 1-12.8 0" />
+            </svg>
+          </button>
+          <div class="addr">
+            <div class="scope" role="group" aria-label="Who can reach this server">
+              <button id="scope-local" class="seg" title="This machine only">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 11l8-6 8 6" /><path d="M6 10v9h12v-9" />
+                </svg>
+              </button>
+              <button id="scope-net" class="seg" title="Share on this network">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="8" /><path d="M4 12h16" />
+                  <path d="M12 4a13 13 0 0 1 0 16a13 13 0 0 1 0-16" />
+                </svg>
+              </button>
+            </div>
+            <span id="host" class="host">127.0.0.1</span>
+            <span class="colon">:</span>
+            <input id="port" type="number" min="1" max="65535" class="port" />
+            <button id="btn-url" class="icon" title="Copy base URL" aria-label="Copy base URL">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+              </svg>
+            </button>
+          </div>
+          <button id="btn-logout" class="icon" title="Sign out" aria-label="Sign out">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
+              <path d="M10 17l-5-5 5-5" />
+              <path d="M5 12h11" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="keys">
+          <div class="key key-head">
+            <span class="name">name</span>
+            <span class="abbr">key</span>
+            <span class="tok">tokens</span>
+            <span class="actions">
+              <button id="btn-new-key" class="icon" title="New key" aria-label="New key">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5v14" /><path d="M5 12h14" />
+                </svg>
+              </button>
+            </span>
+          </div>
+          <div id="key-list" class="key-list"></div>
+        </div>
+
+        <footer id="error" class="error" hidden></footer>
+      </div>
+
+      <button id="btn-expand" class="handle" title="Usage" aria-label="Show usage">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+      </button>
+
+      <aside id="stats" class="stats" hidden>
+        <div class="stats-head">
+          <select id="window">
+            <option value="">∞</option>
+            <option value="24">24h</option>
+            <option value="168">7d</option>
+            <option value="720">30d</option>
+          </select>
+          <button id="btn-reset" class="icon icon-danger" title="Reset usage log" aria-label="Reset usage log">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16" /><path d="M9 7V5h6v2" />
+              <path d="M6 7l1 13h10l1-13" />
+            </svg>
+          </button>
+        </div>
+        <div id="tiles" class="tiles"></div>
+
+        <figure class="plot">
+          <figcaption id="cap-days">tokens / day</figcaption>
+          <div id="chart-days" class="cols"></div>
+          <div id="axis-days" class="axis"></div>
+        </figure>
+
+        <figure class="plot">
+          <figcaption id="cap-hours">tokens / hour of day</figcaption>
+          <div id="chart-hours" class="cols"></div>
+          <div id="axis-hours" class="axis"></div>
+        </figure>
+
+        <div class="splits">
+          <div id="split-keys" class="split"></div>
+          <div id="split-models" class="split"></div>
+        </div>
+      </aside>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,464 @@
+/* Auth2API desktop styling.
+   The app is a small panel, so it carries no prose: state is shown by shape
+   and number, and every action is an icon with a title.
+
+   Monochrome by intent - with no hue in play, the one element that inverts
+   (the power button, when the server is running) cannot be missed. */
+:root {
+  --bg: #f4f4f4;
+  --surface: #ffffff;
+  --border: #e0e0e0;
+  --text: #111111;
+  --muted: #767676;
+  --track: #e9e9e9;
+  --accent: #111111;
+  --on-accent: #ffffff;
+
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /* Macaron palette. The interface stays neutral; colour is reserved for the
+     data, where a hue per series is the whole point. */
+  --c1: #8fd3bd;
+  --c2: #b7aede;
+  --c3: #f2b8a2;
+  --c4: #9fc6e8;
+  --c5: #eaa9bd;
+  --c6: #ecd79a;
+  --on: #6cc9a4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0d0d;
+    --surface: #151515;
+    --border: #2b2b2b;
+    --text: #ededed;
+    --muted: #8e8e8e;
+    --track: #242424;
+    --accent: #ededed;
+    --on-accent: #111111;
+
+    /* Slightly deepened so pastels keep their identity against near-black. */
+    --c1: #6fc4aa;
+    --c2: #a294d4;
+    --c3: #e5a184;
+    --c4: #7fb2dd;
+    --c5: #de8fa8;
+    --c6: #dcc47e;
+    --on: #57bf95;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* A class that sets `display` outranks the user-agent `[hidden]` rule, so
+   without this a hidden pane renders anyway. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.mark {
+  /* Explicit, because inside the power button this is no longer a flex item
+     and an inline span would ignore its own width and height. */
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  flex: none;
+  /* The tile is white in both themes, so it needs an outline of its own to
+     stay a shape rather than dissolving into a light background. */
+  border: 1px solid var(--border);
+  background-image: url("icon.svg");
+  background-size: 100% 100%;
+}
+.mark-lg { width: 60px; height: 60px; border-radius: 15px; }
+
+/* --- signed out ---------------------------------------------------------- */
+
+.gate {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+/* --- shell --------------------------------------------------------------- */
+
+.app { height: 100%; display: flex; }
+/* Once the stats pane is open the panel stops stretching and holds its size,
+   so the extra width all goes to the stats. */
+.app.is-expanded .panel { flex: none; width: 362px; }
+
+.panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* One row carries the whole session: run/stop, where it listens, and the way
+   out. The account itself has nothing actionable about it, so it lives in the
+   sign-out button's tooltip rather than taking a column. */
+.power {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.power svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.power:hover { color: var(--text); }
+.power.is-on { color: var(--on); border-color: var(--on); }
+.power:disabled { opacity: 0.5; cursor: default; }
+
+.addr {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+}
+.addr .colon { color: var(--muted); }
+/* Copying the base URL belongs to the address, so it lives inside the field
+   rather than trailing after it as a loose icon. */
+.addr .icon { width: 20px; height: 20px; margin-left: auto; }
+
+/* A two-segment picker rather than a clickable label: reach is a real choice
+   with a real consequence, and plain text gives no sign it can be pressed. */
+.scope {
+  display: flex;
+  flex: none;
+  margin-right: 0.4375rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.seg {
+  width: 22px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+.seg + .seg { border-left: 1px solid var(--border); }
+.seg svg {
+  width: 12px; height: 12px;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.seg:hover { color: var(--text); }
+.seg.is-active { background: var(--accent); color: var(--on-accent); }
+/* Shared is the state worth noticing, so that segment takes a colour the
+   local one does not. */
+#scope-net.is-active { background: var(--c3); color: #101012; }
+
+.host {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The address itself states where it is reachable, so a shared server never
+   reads as a loopback one at a glance. */
+.host.is-open { color: var(--text); }
+
+.port {
+  /* Wide enough for five digits and no wider: the field sits mid-sentence in
+     an address, so it must not read as a box with slack in it. */
+  width: 3.25rem;
+  flex: none;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 0;
+  padding: 0;
+  user-select: text;
+}
+.port:focus { outline: none; }
+/* A port is typed, not nudged; the spinner only ate space and invited
+   clicking through 65535 values one at a time. */
+.port::-webkit-inner-spin-button,
+.port::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.port { -moz-appearance: textfield; appearance: textfield; }
+
+/* --- keys ---------------------------------------------------------------- */
+
+.keys { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.key-list { flex: 1; overflow-y: auto; }
+
+.key {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.5rem 0.4375rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.key .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.key .abbr {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--muted);
+  flex: none;
+  width: 3.5rem;
+  text-align: right;
+}
+.key .tok {
+  font-size: 0.75rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+  width: 3.5rem;
+  text-align: right;
+}
+/* Fixed so the header's + sits directly above the row buttons. */
+.key .actions { flex: none; width: 3.25rem; display: flex; justify-content: flex-end; gap: 0.125rem; }
+
+.key-head {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.key-head .tok { color: var(--muted); font-size: 0.625rem; }
+.key-head .abbr { font-family: inherit; font-size: 0.625rem; }
+
+.key.is-revoked .name { color: var(--muted); text-decoration: line-through; }
+
+/* The row being named: an input in place of the label, gone on Escape. */
+.key .rename {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.125rem 0.375rem;
+  user-select: text;
+}
+
+/* --- buttons ------------------------------------------------------------- */
+
+.btn {
+  font: inherit;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { opacity: 0.85; }
+.btn-lg { padding: 0.625rem 1.25rem; }
+.btn:disabled { opacity: 0.55; cursor: default; }
+
+.icon {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+.icon svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon:hover { background: var(--track); color: var(--text); }
+.icon-danger:hover { color: var(--text); background: var(--track); }
+.icon.is-done { color: var(--text); opacity: 1; }
+
+/* --- expand handle ------------------------------------------------------- */
+
+.handle {
+  width: 18px;
+  flex: none;
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.handle svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 120ms ease; }
+.handle:hover { background: var(--track); color: var(--text); }
+.handle.is-open svg { transform: rotate(180deg); }
+
+/* --- stats --------------------------------------------------------------- */
+
+.stats {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  overflow-y: auto;
+  padding: 0.875rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.stats-head { display: flex; gap: 0.5rem; align-items: center; }
+.stats-head select {
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0.125rem 0;
+  cursor: pointer;
+}
+.stats-head .icon { margin-left: auto; }
+
+/* Numbers carry this pane, so they get the size and the labels get out of
+   the way - no boxes, just a baseline rule under each figure. */
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.tile { border-top: 1px solid var(--border); padding-top: 0.4375rem; }
+.tile .k {
+  font-size: 0.625rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tile .v { font-size: 1.25rem; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 0.6875rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* --- time plots ---------------------------------------------------------- */
+
+.plot { margin: 0; display: flex; flex-direction: column; gap: 0.375rem; }
+.plot figcaption {
+  font-size: 0.625rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Time runs along the x axis: one column per bucket, oldest at the left. */
+.cols {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 92px;
+  border-bottom: 1px solid var(--border);
+}
+.col { flex: 1; min-width: 0; display: flex; align-items: flex-end; justify-content: center; height: 100%; }
+.col .bar {
+  width: 100%;
+  /* Capped so a single day's bar is a bar, not a slab across the pane. */
+  max-width: 30px;
+  background: var(--bar, var(--c1));
+  border-radius: 2px 2px 0 0;
+  transition: opacity 120ms ease;
+}
+/* A bucket with a little traffic must not look like one with none. */
+.col .bar.tiny { min-height: 2px; }
+.col:hover .bar { opacity: 0.65; }
+
+.axis { display: flex; gap: 2px; }
+.axis span {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.5625rem;
+  color: var(--muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- splits -------------------------------------------------------------- */
+
+.splits { display: grid; grid-template-columns: 1fr 1fr; gap: 1.125rem; }
+.split { display: flex; flex-direction: column; gap: 0.25rem; }
+.split h3 {
+  margin: 0 0 0.125rem;
+  font-size: 0.625rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.split .line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  padding: 0.1875rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.split .line .swatch {
+  width: 7px; height: 7px; border-radius: 2px; flex: none;
+  background: var(--bar, var(--c1));
+}
+.split .line b { font-weight: 400; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.split .line span { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* --- errors -------------------------------------------------------------- */
+
+.error {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text);
+  background: var(--track);
+  border-top: 1px solid var(--border);
+  user-select: text;
+}
