@@ -56,10 +56,6 @@ export OPENAI_API_KEY=sk-a2a-...
 
 桌面端在窗口里做同样的事。
 
-> **非官方。** 登录复用的是 Codex CLI 的公开 OAuth client id，这正是拿到的 token 能花订阅
-> 额度的原因。OpenAI 从未把这条路作为对外接入点，随时可以让它失效。只有少数几个模型可用；
-> 用量页里的"花费"是等价目录价的折算，不是真实扣费。详见[文档](./docs/GUIDE.zh.md)。
-
 ## 许可
 
 MIT。

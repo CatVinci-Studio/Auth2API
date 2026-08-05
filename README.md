@@ -57,12 +57,6 @@ export OPENAI_API_KEY=sk-a2a-...
 
 The desktop app does the same in a window.
 
-> **Unofficial.** The login reuses the Codex CLI's public OAuth client id, which
-> is what makes the token spend a subscription. OpenAI has not published this as
-> an integration point and can break it at any time. Only a few models work, and
-> "cost" in the usage view is an equivalent list price, never a real charge.
-> Details in the [docs](./docs/GUIDE.md).
-
 ## License
 
 MIT.
